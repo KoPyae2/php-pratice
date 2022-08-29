@@ -37,12 +37,23 @@ Route::post('login', [AuthController::class, 'post_login'])->middleware('guest')
 Route::post('/blogs/{blog:slug}/subscription',[BlogController::class,'subscription']);
 
 
-//Admin
+//Admin single route
+// Route::get('/admin/blogs',[AdminBlogController::class,'index'])->middleware('can:admin');  //use gate authorize
+// Route::get('/admin/blogs/create', [AdminBlogController::class, 'create'])->middleware('admin'); //use custom middleware
+// Route::get('/admin/blogs/{blog:id}/edit', [AdminBlogController::class, 'edit'])->middleware('admin');
+// Route::post('/admin/blogs/store', [AdminBlogController::class, 'store'])->middleware('admin');
 
-Route::get('/admin/blogs',[AdminBlogController::class,'index'])->middleware('can:admin');  //use gate authorize
-Route::get('/admin/blogs/create', [AdminBlogController::class, 'create'])->middleware('admin'); //use custom middleware
-Route::get('/admin/blogs/{blog:id}/edit', [AdminBlogController::class, 'edit'])->middleware('admin');
-Route::post('/admin/blogs/store', [AdminBlogController::class, 'store'])->middleware('admin');
+// Route::delete('/admin/blogs/{blog:id}/delete', [AdminBlogController::class, 'destory'])->middleware('admin');
+// Route::patch('/admin/blogs/{blog:id}/update', [AdminBlogController::class, 'update'])->middleware('admin');
 
-Route::delete('/admin/blogs/{blog:id}/delete', [AdminBlogController::class, 'destory'])->middleware('admin');
-Route::patch('/admin/blogs/{blog:id}/update', [AdminBlogController::class, 'update'])->middleware('admin');
+//Admin route group
+Route::middleware('can:admin')->group(function()
+{
+    Route::get('/admin/blogs', [AdminBlogController::class, 'index']);
+    Route::get('/admin/blogs/create', [AdminBlogController::class, 'create']);
+    Route::get('/admin/blogs/{blog:id}/edit', [AdminBlogController::class, 'edit']);
+    Route::post('/admin/blogs/store', [AdminBlogController::class, 'store']);
+
+    Route::delete('/admin/blogs/{blog:id}/delete', [AdminBlogController::class, 'destory']);
+    Route::patch('/admin/blogs/{blog:id}/update', [AdminBlogController::class, 'update']);
+});
