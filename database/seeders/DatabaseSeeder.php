@@ -17,17 +17,12 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
+        $mgmg=User::factory()->create(['name'=>'mg mg','username'=>'mgmg']);
+        $aungaung = User::factory()->create(['name' => 'aungaung', 'username' => 'aungaung']);
+        $front = Catagory::factory()->create(['name'=>'frondend', 'slug' => 'frondend']);
+        $back = Catagory::factory()->create(['name' => 'backend', 'slug' => 'backend']);
 
-        User::truncate();
-        Blog::truncate();
-        Catagory::truncate();
-
-        $front = Catagory::factory()->create(['name'=>'frondend']);
-        $back = Catagory::factory()->create(['name' => 'backend']);
-
-        Blog::factory(5)->create(['catagory_id' => $front->id]);
-        Blog::factory(5)->create(['catagory_id' => $back->id]);
-
-        
+        Blog::factory(2)->create(['catagory_id' => $front->id,'user_id'=>$mgmg->id]);
+        Blog::factory(2)->create(['catagory_id' => $back->id, 'user_id' => $aungaung->id]);
     }
 }

@@ -1,9 +1,14 @@
 <?php
 
 use App\Models\Blog;
-use App\Models\Catagory;
 use App\Models\User;
+use App\Models\Comment;
+use App\Models\Catagory;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\BlogController;
+use App\Http\Controllers\CommentController;
+use App\Http\Controllers\AdminBlogController;
 
 /*
 |------------------------------------------------------------------------------
@@ -16,50 +21,28 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    $blogs = Blog::latest();
-    if(request('search')){
-        $blogs = $blogs->where('title', 'LIKE' ,'%'.request('search').'%');
-    }
-    
-    return view('blogs',[
-        'blogs'=>$blogs->get(),
-        'catagories'=>Catagory::all(),
-    ]);
-});
+Route::get('/', [BlogController::class,'index']);
 
-Route::get('/welcome', function () {
-    return ["statue"=>0,"err_code"=>0,"err_msg"=>"success"];
-});
+Route::get('blogs/{blog:slug}',[BlogController::class,'show']);
+Route::post('blogs/{blog:slug}/comments',[CommentController::class,'store']);
 
-Route::get('blogs/{blog:slug}',function(Blog $blog){ 
-    return view('blog',[
-        'blog' => $blog,
-        'randomBlogs'=>Blog::inRandomOrder()->take(3)->get()
-    ]);
-})->where('blog',"[A-z0-9\-_]+");
+Route::get('register', [AuthController::class, 'create'])->middleware('guest');
+Route::post('register', [AuthController::class, 'store'])->middleware('guest');
 
-Route::get('/catagories/{catagory:slug}',function(Catagory $catagory){
-    $blogs = $catagory->blogs;
-    
-    if(request('search')){
-        $blogs = $blogs->where('title', 'LIKE' ,'%'.request('search').'%');
-    }
-    return view('blogs',[
-        'blogs'=>$blogs,
-        'catagories' => Catagory::all(),
-        'curCatagory'=>$catagory
-    ]);
-});
+Route::post('logout', [AuthController::class, 'logout'])->middleware('auth');
 
-Route::get('/users/{name:username}', function (User $name) {
-    $blogs = $name->blogs;
-    
-    if (request('search')) {
-        $blogs = $blogs->where('title','LIKE','%'.request('search').'%');
-    }
-    return view('blogs', [
-        'blogs' => $blogs,
-        'catagories' => Catagory::all()
-    ]);
-});
+Route::get('login', [AuthController::class, 'login'])->middleware('guest');
+Route::post('login', [AuthController::class, 'post_login'])->middleware('guest');
+
+Route::post('/blogs/{blog:slug}/subscription',[BlogController::class,'subscription']);
+
+
+//Admin
+
+Route::get('/admin/blogs',[AdminBlogController::class,'index'])->middleware('can:admin');  //use gate authorize
+Route::get('/admin/blogs/create', [AdminBlogController::class, 'create'])->middleware('admin'); //use custom middleware
+Route::get('/admin/blogs/{blog:id}/edit', [AdminBlogController::class, 'edit'])->middleware('admin');
+Route::post('/admin/blogs/store', [AdminBlogController::class, 'store'])->middleware('admin');
+
+Route::delete('/admin/blogs/{blog:id}/delete', [AdminBlogController::class, 'destory'])->middleware('admin');
+Route::patch('/admin/blogs/{blog:id}/update', [AdminBlogController::class, 'update'])->middleware('admin');
